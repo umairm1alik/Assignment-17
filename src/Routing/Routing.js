@@ -21,7 +21,7 @@ import RouteLink from "../components/RouteLink/RouteLink";
                 <Route path="/important" element={<Important/>}/>
                 <Route path="/planned" element={ <Planned/>}/>
                 <Route path="/tasks" element={<Tasks/>}/>
-                <Route path="/toDoLogic" element={<ToDoLogic/>}/>
+                <Route path="/" element={<ToDoLogic/>}/>
             </Routes>
         </Router>
     );
