@@ -1,43 +1,37 @@
+import { useDispatch, useSelector } from "react-redux"
 import { useState } from 'react';
 import './ToDoLogic.css'
+import { addList, updateList, deleteList, completedTaskList, restoredItemsList, deletionOfRestoredItem } from "../../store/Actions/ListAction";
 export default function ToDoLogic() {
     let date = new Date();
     let day = date.getDate();
     let month = date.getMonth() + 1;
     let year = date.getFullYear();
     const [task, setTask] = useState('');
-    const [tasksArray, setTasksArray] = useState([task]);
+    const storeTasks = useSelector((store) => store.ListReducer.tasks)
+    const storeCompTasks = useSelector((store) => store.ListReducer.compTask)
     const [flag, setFlag] = useState(false);
     const [updatedIndex, setUpdatedIndex] = useState(0);
-    const [compTask, setCompTask] = useState('')
-    const [compTaskArray, setCompTaskArray] = useState([])
-    const [restoreItem, setRestoreItem] = useState('')
-    const [restoreItemArray, setRestoreItemArray] = useState([])
+    const dispatch=useDispatch();
 
 
     const taskAdditionHandler = () => {
-        if (task != "") {
-            let newTask = { task };
-            console.log(newTask)
-            setTasksArray([...tasksArray, newTask])
-            console.log(tasksArray)
-            setTask("")
-        }
-        else {
-            alert("Enter Task First")
-        }
-
-    }
-    const deleteItemHandler = (delIndex) => {
-        console.log(delIndex)
-        let afterDeletion = tasksArray.filter((task, index) => {
-            if (delIndex !== index) {
-                return task
+       
+            if(!task){
+                alert("Enter Task First")
+                return
             }
+            let newTask = { task };
+            dispatch(addList(newTask));
+            setTask("");
 
-        })
-        setTasksArray([...afterDeletion]);
     }
+    
+    const deleteItemHandler = (delIndex) => {
+        
+        dispatch(deleteList(delIndex));
+    }
+   
     const updateHandler = (taskToUpdate, index) => {
         console.log(taskToUpdate);
         setTask(taskToUpdate)
@@ -46,70 +40,40 @@ export default function ToDoLogic() {
 
     }
     const ctaUpateHandler = () => {
-        if (task != "") {
-            let newTask = { task };
-
-            let updatedTask = tasksArray.map((oldTask, index) => {
-                if (updatedIndex === index) {
-                    return newTask;
-                } else {
-                    return oldTask;
-                }
-            })
-            setTasksArray([...updatedTask])
-            setFlag(false)
-            setTask("")
+        
+        let newTask = { 
+                    task,
+                    updatedIndex
+                 };
+        
+                 dispatch(updateList(newTask))
+                 setTask("")
+                 setFlag(false)
         }
-        else {
-            alert("Enter Task First")
-        }
-
-    }
 
     const completedTaskHandler = (taskCompleted, indexOfCompTask) => {
-        console.log(taskCompleted)
-        console.log(indexOfCompTask)
-        let newTaskCompleted = taskCompleted
-        console.log(newTaskCompleted)
-        setCompTaskArray([...compTaskArray, newTaskCompleted]);
-
-        const afterRemovalOfComTask = tasksArray.filter((task, index) => {
-            if (indexOfCompTask != index) {
-                return task;
-            }
-
-        })
-        setTasksArray([...afterRemovalOfComTask]);
-
-        console.log(compTaskArray)
+        
+        let compTaskActionData={
+            taskCompleted,
+            indexOfCompTask
+        }
+        dispatch(completedTaskList(compTaskActionData))
     }
 
     const restoreHandler = (item, indexOfRestoreItem) => {
 
-        setRestoreItem(item);
+        
+        let restoredItemToRedu={
+            item,
+            indexOfRestoreItem
+        }
 
-        setRestoreItemArray([...restoreItemArray, restoreItem])
-
-        setTasksArray([...tasksArray, restoreItemArray])
-
-        const removalOfRestoreItem = compTaskArray.filter((compItem, index) => {
-
-            if (indexOfRestoreItem != index) {
-                return compItem;
-            }
-
-        });
-        setCompTaskArray([...removalOfRestoreItem]);
+        dispatch(restoredItemsList(restoredItemToRedu))
 
     }
     const deleteRestoreItemHandler=(indexOfRestoreItemForDel)=>{
 
-        const afterDeletionOfCompTask=compTaskArray.filter((item, index)=>{
-            if(indexOfRestoreItemForDel != index){
-                return item
-            }
-        })
-        setCompTaskArray([...afterDeletionOfCompTask])
+        dispatch(deletionOfRestoredItem(indexOfRestoreItemForDel))
     }
     return (
         <div className="col-9 mt-3 toDoSection">
@@ -141,7 +105,7 @@ export default function ToDoLogic() {
             </div>
             <ul className='listStyle'>
 
-                {tasksArray.map((tasksArray, index) => {
+                {storeTasks.map((tasksArray, index) => {
                     return (
                         <div>
                             <button className='checkBtn' onClick={() => completedTaskHandler(tasksArray.task, index)}><svg id='circle' xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
@@ -166,7 +130,7 @@ export default function ToDoLogic() {
             </ul>
             <h1>Completed Tasks</h1>
             <ol className='listStyle'>
-                {compTaskArray.map((item, index) => {
+                {storeCompTasks.map((item, index) => {
 
                     return <li className='lineThrough'>
                         <button className='compBtn' onClick={() => restoreHandler(item, index)} ><svg id='circle' xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-circle" viewBox="0 0 16 16">
